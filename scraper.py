@@ -1,13 +1,19 @@
 from lxml import html
 import requests
 import jsonpickle
+from selenium import webdriver
 
-page = requests.get('https://www.carid.com/advanceone-wheels/')
-tree = html.fromstring(page.content)
-# item = tree.xpath('//div[@title="buyer-name"]/text()')
-# brand = tree.xpath('//span[@class="lst_a_name"]/b/text()')
-# itemname = tree.xpath('//span[@class="lst_a_name"]/span/text()')
+url = 'https://www.carid.com/advanceone-wheels/'
 
+# Sends simple 200 request--for static pages
+# page = requests.get(url)
+# tree = html.fromstring(page.content)
+
+# Using the webdriver will allow for fetching dynamic content
+driver = webdriver.Firefox()
+driver.get('https://www.carid.com/advanceone-wheels/')
+
+tree = html.fromstring(driver.page_source)
 all_items = tree.xpath('//li[@class="js-product-list-item"]')
 processed_items = []
 
@@ -22,6 +28,3 @@ for i in all_items:
     processed_items.append(obj)
 
 print jsonpickle.encode(processed_items)
-# print "buyers: ", buyers
-# print "brand: ", brand
-# print "item: ", item
