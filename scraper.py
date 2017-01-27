@@ -1,3 +1,8 @@
+"""
+Scrapes wehpage data
+"""
+
+import sys
 from lxml import html
 import requests
 import jsonpickle
@@ -20,21 +25,33 @@ def obj_to_json(obj):
     """ Function wrapper for JSON encoding """
     return jsonpickle.encode(obj)
 
-def main():
+def main(argv):
     """ Runs the scraper and extracts the items from the website """
-    tree = get_web_html_using_driver(URL)
+
+    if len(argv) <= 1:
+        print 'Usage:\tscraper.py [URL] [output file]'
+        exit()
+
+    url = argv[1]
+    tree = get_web_html_using_driver(url)
     all_items = tree.xpath('//li[@class="js-product-list-item"]')
     processed_items = []
 
     for i in all_items:
         obj = {}
-        obj['brand'] = i.attrib["data-brand"].strip()
-        obj['itemname'] = i.attrib["data-name"].strip()
-        obj['price'] = i.attrib["data-wl-price"].strip()
+        obj['brand'] = i.attrib['data-brand'].strip()
+        obj['itemname'] = i.attrib['data-name'].strip()
+        obj['price'] = i.attrib['data-wl-price'].strip()
         processed_items.append(obj)
 
     print 'Found', len(processed_items), 'items...\n'
     print obj_to_json(processed_items)
 
-if __name__ == "__main__":
-    main()
+    if argv[1] != '':
+        out_filename = argv[2]
+        print 'Outputting to', out_filename
+        with open(out_filename, 'a') as out_file:
+            out_file.write(obj_to_json(processed_items))
+
+if __name__ == '__main__':
+    main(sys.argv)
